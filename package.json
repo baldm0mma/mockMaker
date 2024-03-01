@@ -5,11 +5,14 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^12.0.0",
-    "fs-extra": "^11.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
-    "react-docgen": "^7.0.3"
+    "@types/react": "^18.2.61",
+    "react-docgen-typescript": "^2.2.2",
+    "ts-node": "^10.9.2"
   }
 }
