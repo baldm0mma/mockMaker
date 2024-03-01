@@ -2,6 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateProps = void 0;
 var generateProps = function () {
-    return "hello world!";
+    console.log("hello world!");
 };
 exports.generateProps = generateProps;

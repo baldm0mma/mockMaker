@@ -1,3 +1,3 @@
 export const generateProps = () => {
-  return "hello world!";
+  console.log("hello world!");
 };
