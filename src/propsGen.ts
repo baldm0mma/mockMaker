@@ -6,9 +6,11 @@ import {
   isTypeAliasDeclaration,
   forEachChild,
   isImportDeclaration,
+  isInterfaceDeclaration,
   resolveModuleName,
   isStringLiteral,
   sys,
+  createProgram,
 } from "typescript";
 import { readFileSync } from "fs";
 
@@ -39,68 +41,101 @@ const [componentName, componentPath] = program.args;
 //   //   // You can do more processing based on the type information if needed
 //   // }
 // };
-function parseTypescriptFile(filePath: string, parsedFiles = new Set()) {
-  // Check if the file has already been parsed to avoid infinite loops for circular dependencies
-  if (parsedFiles.has(filePath)) {
-    return [];
-  }
+// function parseTypescriptFile(
+//   filePath: string
+//   // parsedFiles = new Set()
+// ) {
+//   // Check if the file has already been parsed to avoid infinite loops for circular dependencies
+//   // if (parsedFiles.has(filePath)) {
+//   //   return [];
+//   // }
 
-  parsedFiles.add(filePath);
+//   // parsedFiles.add(filePath);
 
-  const fileContent = readFileSync(filePath, "utf8");
+//   const fileContent = readFileSync(filePath, "utf8");
 
+//   const sourceFile = createSourceFile(
+//     filePath,
+//     fileContent,
+//     ScriptTarget.Latest,
+//     true
+//   );
+
+//   console.log(sourceFile, "sourceFile");
+
+//   const typeDefinitions: any = [];
+
+//   function visit(node: any) {
+//     // if (isImportDeclaration(node) && isStringLiteral(node.moduleSpecifier)) {
+//       // const importFilePath = getImportedFilePath(
+//       //   node.moduleSpecifier.text,
+//       //   filePath
+//       // );
+
+//       // if (!importFilePath) {
+//       //   const importedTypeDefinitions = parseTypescriptFile(
+//       //     // @ts-ignore
+//       //     importFilePath,
+//       //     parsedFiles
+//       //   );
+//       //   typeDefinitions.push(...importedTypeDefinitions);
+//       // }
+//     // }
+
+//     // if (isTypeAliasDeclaration(node)) {
+//     //   typeDefinitions.push({
+//     //     name: node.name.escapedText,
+//     //     type: node.type.getText(),
+//     //   });
+//     // }
+
+//     // forEachChild(node, visit);
+//   }
+
+//   // function getImportedFilePath(moduleSpecifier: any, currentFilePath: any) {
+//   //   const resolvedModule = resolveModuleName(
+//   //     moduleSpecifier,
+//   //     currentFilePath,
+//   //     {},
+//   //     sys
+//   //   ).resolvedModule;
+
+//   //   // Check if resolvedModule is defined and has a resolvedFileName
+//   //   return (resolvedModule && resolvedModule.resolvedFileName) || null;
+//   // }
+
+//   visit(sourceFile);
+
+//   console.log(typeDefinitions, "typeDefinitions");
+//   return typeDefinitions;
+// }
+
+function scanFile(componentPath: string) {
+  const fileContent = readFileSync(componentPath, "utf8");
   const sourceFile = createSourceFile(
-    filePath,
+    componentPath,
     fileContent,
     ScriptTarget.Latest,
     true
   );
+  // console.log(sourceFile, "sourceFile");
+  // @ts-ignore
+  console.log(sourceFile.name.escapedText, "sourceFile?.fileName.getText()");
 
-  const typeDefinitions: any = [];
+  const typeMap = new Map();
 
   function visit(node: any) {
-    if (isImportDeclaration(node) && isStringLiteral(node.moduleSpecifier)) {
-      const importFilePath = getImportedFilePath(
-        node.moduleSpecifier.text,
-        filePath
-      );
-
-      if (!importFilePath) {
-        const importedTypeDefinitions = parseTypescriptFile(
-          // @ts-ignore
-          importFilePath,
-          parsedFiles
-        );
-        typeDefinitions.push(...importedTypeDefinitions);
-      }
-    }
-
-    if (isTypeAliasDeclaration(node)) {
-      typeDefinitions.push({
-        name: node.name.escapedText,
-        type: node.type.getText(),
-      });
+    if (isTypeAliasDeclaration(node) || isInterfaceDeclaration(node)) {
+      // typeMap.set(node.name.getText(), node);
     }
 
     forEachChild(node, visit);
   }
 
-  function getImportedFilePath(moduleSpecifier: any, currentFilePath: any) {
-    const resolvedModule = resolveModuleName(
-      moduleSpecifier,
-      currentFilePath,
-      {},
-      sys
-    ).resolvedModule;
-
-    // Check if resolvedModule is defined and has a resolvedFileName
-    return (resolvedModule && resolvedModule.resolvedFileName) || null;
-  }
-
   visit(sourceFile);
 
-  console.log(typeDefinitions, "typeDefinitions");
-  return typeDefinitions;
+  // console.log(typeMap, "typeMap");
+  return typeMap;
 }
 
-parseTypescriptFile(componentPath);
+scanFile(componentPath);
